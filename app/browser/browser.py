@@ -3,24 +3,19 @@ from app.browser.gui.main_window import MainWindow
 from app.browser.gui.sub_window.add_profile_window import add_profile_widget
 from app.browser.gui.sub_window.password_window import password_widget
 from app.browser.gui.sub_window.password_change_window import password_change_widget
-from gui.app_base import Main
+from gui.app_base import OverlayWindow
 
 import http.client, requests
 import sys, json, shutil, time, os
 
 
 
-class BrowserWindow (Main):
+class BrowserWindow (OverlayWindow):
     new_profile_window = Signal(QWebEngineProfile)
     saved = Signal(int, int)
     def __init__(self, parent):
         super().__init__()
-        self.setWindowFlags(
-            Qt.Tool |
-            Qt.WindowStaysOnTopHint |
-            Qt.X11BypassWindowManagerHint |
-            Qt.FramelessWindowHint
-            )
+
         self.actionEvent
         os.environ["QTWEBENGINE_CHROMIUM_FLAGS"]= "--enable-logging --log-level=3"
         os.environ["QTWEBENGINE_CHROMIUM_FLAGS"] = "--blink-settings=forceDarkModeEnabled=true, darkModeImagePolicy=2 --enable-logging --log-level=3"
@@ -222,7 +217,8 @@ class BrowserWindow (Main):
             self.ui.profile_name_line.setText(self.profile_list[self.profile_num]['name'])
 
             self.ui.right_menu.setCurrentWidget(self.ui.setting_area)
-            self.ui.profile_back_button.setMaximumHeight(self.ui.profile_back_max)      
+            self.ui.profile_back_button.setMaximumHeight(self.ui.profile_back_max)  
+            self.ui.profile_back_button.setMinimumHeight(self.ui.profile_back_max)      
 
     def profile_select(self):
         num = self.ui.select_profile.currentRow()
@@ -342,18 +338,28 @@ class BrowserWindow (Main):
         
 
     def fullscreen(self):
-        if self.isActive:
+        if self.windowState() == Qt.WindowState.WindowFullScreen:
             self.ui.top_frame.setMaximumHeight(50)
-            self.showMaximized()
+            self.ui.bookmark_bar.setMaximumHeight(25)
+            self.ui.bookmark_bar.setMinimumHeight(25)
+            print(self.past_state)
+
+            if self.past_state == Qt.WindowState.WindowMaximized:
+                self.showMaximized()
+            else:
+                self.showNormal()
+
             self.setWindowOpacity(self.ui.opacity.value()/100)
 
-            self.isActive = False
 
         else:
+            self.past_state = self.windowState()
+
             self.ui.top_frame.setMaximumHeight(0)
+            self.ui.bookmark_bar.setMaximumHeight(0)
+            self.ui.bookmark_bar.setMinimumHeight(0)
             self.showFullScreen()
             self.setWindowOpacity(1)
-            self.isActive = True
 
     def update_url_edit(self):
         print(self.ui.view_widget.url().toString())

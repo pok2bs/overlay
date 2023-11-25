@@ -1,20 +1,25 @@
 import PySide6.QtGui
 from import_pyside6 import *
+from gui.app_base import OverlayWindow
 import sys
 
-class NoteWindow(QWidget):
+class NoteWindow(OverlayWindow):
     def __init__(self, parent):
         super().__init__()
-        self.setWindowFlags(
-            Qt.Tool |
-            Qt.WindowStaysOnTopHint
-            )        
-        main_layout = QVBoxLayout()
+
         self.text_edit = QTextEdit()
+        
+        main_layout = QVBoxLayout()
         main_layout.addWidget(self.text_edit)
-        main_layout.setContentsMargins(0,0,0,0)
-        self.setLayout(main_layout)
+        main_layout.setContentsMargins(10,10,10,10)
+
+        main_frame = QFrame()
+        main_frame.setStyleSheet("background-color: #404040; color: white; border-radius: 15px;")
+        main_frame.setLayout(main_layout)
+
+        self.setCentralWidget(main_frame)
         self.resize(700, 400)
+
         self.shortcut = QShortcut(QKeySequence("Ctrl+S"), self)
         self.open_shortcut = QShortcut(QKeySequence("Ctrl+O"), self)
         self.save_as_shortcut = QShortcut(QKeySequence("Ctrl+S+A"), self)

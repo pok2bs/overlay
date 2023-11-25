@@ -1,6 +1,6 @@
 import PySide6.QtWidgets
 from import_pyside6 import *
-from gui.custom_button import defaltButton
+from gui.custom_button import TitleBarButton
 # 출처 https://stackoverflow.com/questions/62807295/how-to-resize-a-window-from-the-edges-after-adding-the-property-qtcore-qt-framel
 class SideGrip(QWidget):
     def __init__(self, parent, edge):
@@ -56,18 +56,22 @@ class SideGrip(QWidget):
         self.mousePos = None
 
 
-class Main(QMainWindow):
+class OverlayWindow(QMainWindow):
     _gripSize = 6
     def __init__(self):
         super().__init__()
         self.setAttribute(Qt.WA_TranslucentBackground)
         self.bg = '#000000'
-        self.opacity = 0.01
+        self.opacity = 0.05
 
 
-        self.setWindowFlags(Qt.FramelessWindowHint|Qt.Tool |
-            Qt.WindowStaysOnTopHint)
-
+        self.setWindowFlags(
+            Qt.Tool |
+            Qt.WindowStaysOnTopHint |
+            Qt.X11BypassWindowManagerHint |
+            Qt.FramelessWindowHint
+            )
+        
         self.sideGrips = [
             SideGrip(self, Qt.LeftEdge), 
             SideGrip(self, Qt.TopEdge), 
@@ -139,12 +143,38 @@ class Main(QMainWindow):
 
     def setCentralWidget(self, widget: QWidget) -> None:
         main_widget = QWidget()
+        widget.setStyleSheet("background-color: #404040; color: white; border-radius: 15px;")
+        self.title_bar = CustomTitleBar(self)
         main_layout = QVBoxLayout()
-        main_layout.addWidget(CustomTitleBar(self))
+        main_layout.addWidget(self.title_bar)
         main_layout.addWidget(widget)
         main_layout.setContentsMargins(0,0,0,0)
         main_widget.setLayout(main_layout)
         return super().setCentralWidget(main_widget)
+    
+    def setWindowTitle(self, arg__1: str) -> None:
+        self.title_bar.title.setText(arg__1)
+        return super().setWindowTitle(arg__1)
+    
+    def showFullScreen(self) -> None:
+        self.title_bar.setMaximumHeight(0)
+        self.title_bar.setMinimumHeight(0)
+        return super().showFullScreen()
+    
+    def show(self) -> None:
+        self.title_bar.setMaximumHeight(25)
+        self.title_bar.setMinimumHeight(25)
+        return super().show()
+    
+    def showNormal(self) -> None:
+        self.title_bar.setMaximumHeight(25)
+        self.title_bar.setMinimumHeight(25)
+        return super().showNormal()
+    
+    def showMaximized(self) -> None:
+        self.title_bar.setMaximumHeight(25)
+        self.title_bar.setMinimumHeight(25)
+        return super().showMaximized()
 
 class CustomTitleBar(QFrame):
     def __init__(self, parent):
@@ -152,27 +182,35 @@ class CustomTitleBar(QFrame):
         self.setMaximumHeight(25)
         self.setMinimumHeight(25)
 
-        self.setStyleSheet("background-color:#A0A0A0; border-radius:10px; opacity:0.7")
+        self.setStyleSheet("background-color:#A0A0A0; border-radius:12px; opacity:0.7")
         self.parent = parent
         
-        self.max_button = defaltButton("ㅁ")
-        self.mini_button = defaltButton("_")
-        self.close_button = defaltButton("X")
+        self.title = QLabel()
+        self.title.setStyleSheet("color: black;")
+        self.size_button = TitleBarButton("ㅁ")
+        self.close_button = TitleBarButton(text = "X", color = "E21A1A", hover= "EC7777", pressed="981B1B")
+
+        self.size_button.clicked.connect(self.resize)
+        self.close_button.clicked.connect(self.parent.close)
+
         horizen_spacer = QSpacerItem(20, 40, QSizePolicy.Expanding, QSizePolicy.Minimum )
 
-
-
         self.main_layout = QHBoxLayout()
+        self.main_layout.addWidget(self.title)
+
         self.main_layout.addItem(horizen_spacer)
 
-        self.main_layout.addWidget(self.mini_button)
-        self.main_layout.addWidget(self.max_button)
+        self.main_layout.addWidget(self.size_button)
         self.main_layout.addWidget(self.close_button)
-        self.main_layout.setContentsMargins(0,0,10,0)
+        self.main_layout.setContentsMargins(5,0,5,0)
+
 
         self.setLayout(self.main_layout)
-
-
+    def resize(self):
+        if self.parent.isMaximized():
+            self.parent.showNormal()
+        else:
+            self.parent.showMaximized()
 
     def mousePressEvent(self, event):
         if event.button() == Qt.LeftButton:

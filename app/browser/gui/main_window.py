@@ -1,17 +1,19 @@
 from import_pyside6 import *
 from app.browser.gui.web.web_view import customWebView 
+from gui.custom_button import *
+from gui.custom_line_edit import DefaltLineEdit
 
 class MainWindow (object):
     def setup_ui(self, parent):
 
         
         #위 구성요소
-        self.url_edit = QLineEdit()
+        self.url_edit = DefaltLineEdit()
         self.url_edit.setPlaceholderText('URL을 입력하세요')
-        self.back_button = QPushButton("뒤")
-        self.forward_button = QPushButton("앞")
-        self.reload_button = QPushButton("새로고침")
-        self.setting_button = QPushButton("설정")
+        self.back_button = AppButton("뒤")
+        self.forward_button = AppButton("앞")
+        self.reload_button = AppButton("새로고침")
+        self.setting_button = AppButton("설정")
 
         self.top_layout = QHBoxLayout()
         self.top_layout.addWidget(self.back_button)
@@ -23,7 +25,6 @@ class MainWindow (object):
 
         self.top_frame = QFrame()
         self.top_frame.setLayout(self.top_layout)
-        self.top_frame.setStyleSheet("background-color:#A0A0A0; border-top-left-radius:15px; border-top-right-radius:15px")
         self.top_frame.setMaximumHeight(50)
 
         #웹 표시
@@ -46,21 +47,21 @@ class MainWindow (object):
         self.bookmark_Label = QLabel("즐겨찾기")
         self.bookmark_widget = QListWidget()
         self.bookmark_new_window = QCheckBox("새 창에서 열기")
-        self.bookmark_delete_button = QPushButton("삭제")
-        self.bookmarks_clear_button = QPushButton("모두 삭제")
+        self.bookmark_delete_button = AppButton("삭제")
+        self.bookmarks_clear_button = AppButton("모두 삭제")
 
         self.bookmark_name_change = QHBoxLayout()
-        self.bookmark_name_line = QLineEdit()
+        self.bookmark_name_line = DefaltLineEdit()
         self.bookmark_name_line.setPlaceholderText("즐겨찾기 이름")
-        self.bookmark_name_button = QPushButton("이름변경")
+        self.bookmark_name_button = AppButton("이름변경")
         
         self.bookmark_name_change.addWidget(self.bookmark_name_line)
         self.bookmark_name_change.addWidget(self.bookmark_name_button)
 
         self.bookmark_url_change = QHBoxLayout()
-        self.bookmark_url_line = QLineEdit()
+        self.bookmark_url_line = DefaltLineEdit()
         self.bookmark_url_line.setPlaceholderText("URL")
-        self.bookmark_url_button = QPushButton("URL 변경")
+        self.bookmark_url_button = AppButton("URL 변경")
 
         self.bookmark_url_change.addWidget(self.bookmark_url_line)
         self.bookmark_url_change.addWidget(self.bookmark_url_button)
@@ -76,20 +77,20 @@ class MainWindow (object):
         #프로필 변경
         self.set_profile_layout = QVBoxLayout()
         self.set_profile_label = QLabel("프로필")
-        self.password_change = QPushButton("비밀번호 변경")
-        self.profile_remove = QPushButton("이 프로필 삭제")
+        self.password_change = AppButton("비밀번호 변경")
+        self.profile_remove = AppButton("이 프로필 삭제")
         
         self.secret_mod = QCheckBox("비밀모드(쿠키저장 안함)")
         
         self.profile_name_change = QHBoxLayout()
-        self.profile_name_line = QLineEdit()
+        self.profile_name_line = DefaltLineEdit()
         self.profile_name_line.setPlaceholderText("프로필 이름")
-        self.profile_name_button = QPushButton("이름변경")
+        self.profile_name_button = AppButton("이름변경")
         self.profile_name_change.addWidget(self.profile_name_line)
         self.profile_name_change.addWidget(self.profile_name_button)
         
-        self.profile_change = QPushButton("프로필 변경")
-        self.add_profile = QPushButton("새 프로필 추가")
+        self.profile_change = AppButton("프로필 변경")
+        self.add_profile = AppButton("새 프로필 추가")
 
         self.set_profile_layout.addWidget(self.set_profile_label)
         self.set_profile_layout.addLayout(self.profile_name_change)
@@ -134,10 +135,12 @@ class MainWindow (object):
         self.profile_layout = QVBoxLayout()
         self.select_profile_label = QLabel("<b>프로필 선택</b>")
         self.select_profile = QListWidget()
-        self.profile_back_button = QPushButton("뒤로")
+        self.profile_back_button = AppButton("뒤로")
         self.profile_back_max = self.profile_back_button.maximumHeight()
         self.profile_back_button.setMaximumHeight(0)
-        self.not_select_profile = QPushButton("프로필 없이 계속")
+        self.profile_back_button.setMinimumHeight(0)
+
+        self.not_select_profile = AppButton("프로필 없이 계속")
         
         self.select_profile.addItem("+ 프로필 추가")
         self.profile_layout.addWidget(self.select_profile_label)
@@ -180,7 +183,7 @@ class MainWindow (object):
 
         self.central_widget = QFrame()
         self.central_widget.setLayout(self.central_layout)
-        self.central_widget.setStyleSheet("background-color:#A0A0A0; border-radius:15px")
+        self.central_widget.setStyleSheet("background-color: #404040; color: white; border-radius: 15px;")
 
         parent.setCentralWidget(self.central_widget)
 

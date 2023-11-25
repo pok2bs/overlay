@@ -1,6 +1,6 @@
 import PySide6.QtGui
 from import_pyside6 import *
-from gui.custom_button import taskBarButton
+from gui.custom_button import TaskBarButton
 
 class taskBar(QFrame):
     hover = Signal(bool)
@@ -16,10 +16,10 @@ class taskBar(QFrame):
         self.setMaximumHeight(75)
         self.hover = False
 
-        self.note_Button = taskBarButton("메모장")
-        self.browser_Button = taskBarButton("브라우저")
-        self.image_Button = taskBarButton("이미지")
-        self.music_Button = taskBarButton("음악")
+        self.note_Button = TaskBarButton("메모장")
+        self.browser_Button = TaskBarButton("브라우저")
+        self.image_Button = TaskBarButton("이미지")
+        self.music_Button = TaskBarButton("음악")
 
         self.setStyleSheet("background-color:#353535; border-radius: 15px")
 
