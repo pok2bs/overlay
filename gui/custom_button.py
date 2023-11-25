@@ -22,7 +22,7 @@ class defaltButton(QPushButton):
         
 class taskBarButton(defaltButton):
     def __init__(self, text):
-        super().__init__()
+        super().__init__(text)
         self.setText(text)
         self.setMinimumWidth(50)
         self.setMinimumHeight(50)
@@ -40,4 +40,5 @@ class taskBarButton(defaltButton):
                               QPushButton::pressed{
                            background-color:#202020
                               }''')
+        
         
