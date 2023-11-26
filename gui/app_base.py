@@ -1,6 +1,6 @@
 import PySide6.QtWidgets
 from import_pyside6 import *
-from gui.custom_button import TitleBarButton
+from gui.custom_button import *
 # 출처 https://stackoverflow.com/questions/62807295/how-to-resize-a-window-from-the-edges-after-adding-the-property-qtcore-qt-framel
 class SideGrip(QWidget):
     def __init__(self, parent, edge):
@@ -60,6 +60,7 @@ class OverlayWindow(QMainWindow):
     _gripSize = 6
     def __init__(self):
         super().__init__()
+
         self.setAttribute(Qt.WA_TranslucentBackground)
         self.bg = '#000000'
         self.opacity = 0.05
@@ -104,15 +105,29 @@ class OverlayWindow(QMainWindow):
         # top left
         self.cornerGrips[0].setGeometry(
             QRect(outRect.topLeft(), inRect.topLeft()))
+        
+        self.cornerGrips[0].setStyleSheet("""
+                background-color: transparent; 
+        """)
         # top right
         self.cornerGrips[1].setGeometry(
             QRect(outRect.topRight(), inRect.topRight()).normalized())
+        
+        self.cornerGrips[1].setStyleSheet("""
+                background-color: transparent; 
+        """)
         # bottom right
         self.cornerGrips[2].setGeometry(
             QRect(inRect.bottomRight(), outRect.bottomRight()))
+        self.cornerGrips[2].setStyleSheet("""
+                background-color: transparent; 
+        """)
         # bottom left
         self.cornerGrips[3].setGeometry(
             QRect(outRect.bottomLeft(), inRect.bottomLeft()).normalized())
+        self.cornerGrips[3].setStyleSheet("""
+                background-color: transparent; 
+        """)
 
         # left edge
         self.sideGrips[0].setGeometry(
@@ -145,36 +160,58 @@ class OverlayWindow(QMainWindow):
         main_widget = QWidget()
         widget.setStyleSheet("background-color: #404040; color: white; border-radius: 15px;")
         self.title_bar = CustomTitleBar(self)
-        main_layout = QVBoxLayout()
-        main_layout.addWidget(self.title_bar)
-        main_layout.addWidget(widget)
-        main_layout.setContentsMargins(0,0,0,0)
-        main_widget.setLayout(main_layout)
+        self.title_bar.slider.valueChanged.connect(self.setOpacity)
+        self.title_bar.slider.sliderReleased.connect(lambda opacity = 1 : self.setWindowOpacity(opacity))
+        self.main_layout = QVBoxLayout()
+        self.main_layout.addWidget(self.title_bar)
+        self.main_layout.addWidget(widget)
+        self.main_layout.setContentsMargins(0,0,0,0)
+        self.past_spacing = self.main_layout.spacing()
+
+        main_widget.setLayout(self.main_layout)
         return super().setCentralWidget(main_widget)
+        
+    def setOpacity(self):
+        opacity = self.title_bar.slider.value()/100
+        self.setWindowOpacity(opacity)
     
     def setWindowTitle(self, arg__1: str) -> None:
         self.title_bar.title.setText(arg__1)
         return super().setWindowTitle(arg__1)
     
     def showFullScreen(self) -> None:
-        self.title_bar.setMaximumHeight(0)
-        self.title_bar.setMinimumHeight(0)
+        self.setGripSize(0)
+        self.setContentsMargins(0,0,0,0)
+        self.title_bar.hide()
+        self.main_layout.setSpacing(0)
         return super().showFullScreen()
     
     def show(self) -> None:
-        self.title_bar.setMaximumHeight(25)
-        self.title_bar.setMinimumHeight(25)
+        self.set_before_fullscreen()
+
         return super().show()
     
     def showNormal(self) -> None:
-        self.title_bar.setMaximumHeight(25)
-        self.title_bar.setMinimumHeight(25)
+        self.set_before_fullscreen()
+
+
         return super().showNormal()
     
     def showMaximized(self) -> None:
-        self.title_bar.setMaximumHeight(25)
-        self.title_bar.setMinimumHeight(25)
+
+        self.set_before_fullscreen()
+        self.setGripSize(0)
+
         return super().showMaximized()
+    
+    def set_before_fullscreen(self):
+        if self.windowState() == Qt.WindowState.WindowFullScreen:
+            self.main_layout.setSpacing(self.past_spacing)
+
+            self.title_bar.show()
+
+        self.setGripSize(6)
+        
 
 class CustomTitleBar(QFrame):
     def __init__(self, parent):
@@ -187,6 +224,10 @@ class CustomTitleBar(QFrame):
         
         self.title = QLabel()
         self.title.setStyleSheet("color: black;")
+        self.toggle_button = ToggleButton("")
+        self.toggle_button.setMaximumWidth(20)
+        self.toggle_button.clicked.connect(self.toggle_event)
+
         self.size_button = TitleBarButton("ㅁ")
         self.close_button = TitleBarButton(text = "X", color = "E21A1A", hover= "EC7777", pressed="981B1B")
 
@@ -199,13 +240,43 @@ class CustomTitleBar(QFrame):
         self.main_layout.addWidget(self.title)
 
         self.main_layout.addItem(horizen_spacer)
+        self.slider = QSlider(Qt.Horizontal)
+        self.slider.setStyleSheet('''
+                            QSlider::groove:horizontal{
+                                  border: 1px;
+                                  height: 10px; 
+                                  margin: 0px;
+                                  border-radius: 5px;
+                                  background-color: #BFBFBF;
+                                }
+                            QSlider::handle:horizontal{
+                                  background-color: blue; 
+                                  border: 1px; 
+                                  height: 15px; 
+                                  width: 15px; margin: 0 0;
+                                  border-radius:5px  }''')
+        self.slider.setRange(0, 100)
+        self.slider.setSingleStep(100)
+        self.slider.setValue(100)
+        self.slider.setMaximumWidth(50)
+        self.slider.setMinimumWidth(25)
+        self.slider.hide()
 
+        self.main_layout.addWidget(self.slider)
+        self.main_layout.addWidget(self.toggle_button)
         self.main_layout.addWidget(self.size_button)
         self.main_layout.addWidget(self.close_button)
-        self.main_layout.setContentsMargins(5,0,5,0)
+        self.main_layout.setContentsMargins(5,0,3,0)
 
 
         self.setLayout(self.main_layout)
+
+    def toggle_event(self):
+        if self.toggle_button.is_active:
+            self.slider.show()
+        else:
+            self.slider.hide()
+
     def resize(self):
         if self.parent.isMaximized():
             self.parent.showNormal()

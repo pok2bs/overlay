@@ -64,7 +64,9 @@ class Clock(QWidget):
         time = QTime.currentTime()
         day = QDate.currentDate()
         self.currentTime = time.toString('hh:mm')
-        self.day = day.toString('MM월 dd일')
+        locale = QLocale(QLocale.Korean)
+        self.day = locale.toString(day, 'MM월 dd일 dddd')
+
         self.day_label.setText(f"<b>{self.day}</b>")
         self.time_label.setText(f"<b>{self.currentTime}</b>")
 

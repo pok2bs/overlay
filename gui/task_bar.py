@@ -2,7 +2,7 @@ import PySide6.QtGui
 from import_pyside6 import *
 from gui.custom_button import TaskBarButton
 
-class taskBar(QFrame):
+class taskBar(QWidget):
     hover = Signal(bool)
     def __init__(self, parent):
         super().__init__()
@@ -13,7 +13,11 @@ class taskBar(QFrame):
             Qt.X11BypassWindowManagerHint |
             Qt.WindowStaysOnTopHint
                         )
-        self.setMaximumHeight(75)
+        self.setAttribute(Qt.WA_TranslucentBackground, True)
+
+        self.main_frame = QFrame()
+        
+        self.main_frame.setMaximumHeight(75)
         self.hover = False
 
         self.note_Button = TaskBarButton("메모장")
@@ -21,7 +25,7 @@ class taskBar(QFrame):
         self.image_Button = TaskBarButton("이미지")
         self.music_Button = TaskBarButton("음악")
 
-        self.setStyleSheet("background-color:#353535; border-radius: 15px")
+        self.main_frame.setStyleSheet("background-color:#353535; border-radius: 20px")
 
         self.main_layout = QHBoxLayout(self)
         self.main_layout.addWidget(self.note_Button)
@@ -35,7 +39,10 @@ class taskBar(QFrame):
         self.parent.showed.connect(self.window_move)
         self.parent.hid.connect(self.hide)
 
-        self.setLayout(self.main_layout)
+        self.main_frame.setLayout(self.main_layout)
+        layout = QVBoxLayout()
+        layout.addWidget(self.main_frame)
+        self.setLayout(layout)
 
     def window_move(self):
         self.move(self.parent.width()/3 + self.width()/2,self.parent.height() - 100 - self.height())

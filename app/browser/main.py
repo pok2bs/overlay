@@ -18,12 +18,22 @@ class BrowserManager(QObject):
         parent.hid.connect(self.hide)
     def show(self):
         for view in self.view:
-            view.show()
+            if view.title_bar.toggle_button.is_active:
 
+                view.setWindowOpacity(1)
+                view.title_bar.show()
+                view.raise_()
+            else:
+                view.show()
 
     def hide(self):
         for view in self.view:
-            view.hide()
+            if view.title_bar.toggle_button.is_active:
+                view.title_bar.hide()
+
+                view.setOpacity()
+            else:
+                view.hide()
             
     def load(self):
         try:
@@ -47,9 +57,15 @@ class BrowserManager(QObject):
     @Slot(QWebEngineProfile)
     def new_window(self, profile):
         view = BrowserWindow(self)
-        print(type(profile))
-        storage_name = profile.persistentStoragePath().split("/")[-1].lstrip("storage-")
-        view.ui.view_widget.setPage(QWebEnginePage(profile, view.ui.view_widget))
+        self.profile = profile
+        try:
+            storage_name = self.profile.persistentStoragePath().split("/")[-1].lstrip("storage-")
+        except:
+            self.profile = QWebEngineProfile().defaultProfile()
+            storage_name = "OffTheRecord"
+            print("error!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+
+        view.ui.view_widget.setPage(QWebEnginePage(self.profile, view.ui.view_widget))
         view.new_profile_window.connect(self.new_window)
         view.saved.connect(self.update)
         
@@ -60,6 +76,8 @@ class BrowserManager(QObject):
             print(storage_name)
             self.load()
             view.bookmarks_update()
+        else:
+            view.signal_connect()
         view.ui.view_widget.setUrl(QUrl("https:/www.google.com"))
 
         view.show()

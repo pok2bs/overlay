@@ -151,6 +151,7 @@ class BrowserWindow (OverlayWindow):
                 json.dump(self.profile_list, save_, indent="\t")
         self.saved.emit(self.profile_num, del_num)
 
+
     def set_profile(self):
         self.password = self.password_widget.profile_password_line.text()
 
@@ -160,17 +161,9 @@ class BrowserWindow (OverlayWindow):
             profile = QWebEngineProfile("storage-{0}".format(self.profile_list[self.select_profile_num]["storagenum"]), self.ui.view_widget)
 
             page = QWebEnginePage(profile, self.ui.view_widget)
+            self.ui.view_widget.page().profile().downloadRequested.connect(self.on_downloadRequested)
 
-            profile.downloadRequested.connect(self.on_downloadRequested)
-
-            os_info = "Windows NT 10.0; Win64; x64"
-            profile.setHttpUserAgent(f"Mozilla/5.0 ({os_info}; rv:90.0) Gecko/20100101 Firefox/90.0")
-            profile.settings().setAttribute(QWebEngineSettings.FullScreenSupportEnabled, True)
-            self.profile_path = profile.persistentStoragePath()
-
-            page.fullScreenRequested.connect(self.fullscreen)
-            page.fullScreenRequested.connect(lambda request: request.accept())
-
+            self.signal_connect()
             
             if self.password_widget.is_new_window_show.isChecked():
                 self.new_profile_window.emit(page.profile())
@@ -218,7 +211,17 @@ class BrowserWindow (OverlayWindow):
 
             self.ui.right_menu.setCurrentWidget(self.ui.setting_area)
             self.ui.profile_back_button.setMaximumHeight(self.ui.profile_back_max)  
-            self.ui.profile_back_button.setMinimumHeight(self.ui.profile_back_max)      
+            self.ui.profile_back_button.setMinimumHeight(self.ui.profile_back_max)
+
+    def signal_connect(self):
+            os_info = "Windows NT 10.0; Win64; x64"
+            self.ui.view_widget.page().profile().setHttpUserAgent(f"Mozilla/5.0 ({os_info}; rv:90.0) Gecko/20100101 Firefox/90.0")
+            self.ui.view_widget.page().profile().settings().setAttribute(QWebEngineSettings.FullScreenSupportEnabled, True)
+            self.profile_path = self.ui.view_widget.page().profile().persistentStoragePath()
+
+            self.ui.view_widget.page().fullScreenRequested.connect(lambda is_from_browser = True : self.fullscreen(is_from_browser))
+            self.ui.view_widget.page().fullScreenRequested.connect(lambda request: request.accept())
+      
 
     def profile_select(self):
         num = self.ui.select_profile.currentRow()
@@ -337,12 +340,12 @@ class BrowserWindow (OverlayWindow):
             self.ui.view_widget.setUrl(f"https://www.google.com/search?q={self.input_url}")
         
 
-    def fullscreen(self):
+    def fullscreen(self, is_from_browser = False):
+
         if self.windowState() == Qt.WindowState.WindowFullScreen:
             self.ui.top_frame.setMaximumHeight(50)
-            self.ui.bookmark_bar.setMaximumHeight(25)
-            self.ui.bookmark_bar.setMinimumHeight(25)
-            print(self.past_state)
+            self.ui.bookmark_bar.setMaximumHeight(35)
+            self.ui.bookmark_bar.setMinimumHeight(35)
 
             if self.past_state == Qt.WindowState.WindowMaximized:
                 self.showMaximized()
@@ -351,8 +354,8 @@ class BrowserWindow (OverlayWindow):
 
             self.setWindowOpacity(self.ui.opacity.value()/100)
 
-
-        else:
+        elif (self.windowState() == Qt.WindowState.WindowMaximized or self.windowState() == Qt.WindowState.WindowActive 
+        or self.windowState() == Qt.WindowState.WindowNoState or is_from_browser and not self.isActive):
             self.past_state = self.windowState()
 
             self.ui.top_frame.setMaximumHeight(0)
@@ -360,6 +363,11 @@ class BrowserWindow (OverlayWindow):
             self.ui.bookmark_bar.setMinimumHeight(0)
             self.showFullScreen()
             self.setWindowOpacity(1)
+            
+        if is_from_browser and not self.isActive:
+            self.isActive = True
+        elif is_from_browser:
+            self.isActive = False
 
     def update_url_edit(self):
         print(self.ui.view_widget.url().toString())

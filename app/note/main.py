@@ -16,10 +16,20 @@ class NoteManager(QObject):
 
     def show(self):
         for note in self.note:
-            note.show()
+            if note.title_bar.toggle_button.is_active:
+
+                note.setWindowOpacity(1)
+                note.title_bar.show()
+                note.raise_()
+            else:
+                note.show()
 
     def hide(self):
         for note in self.note:
-            note.hide()
+            if note.title_bar.toggle_button.is_active:
+                note.title_bar.hide()
 
+                note.setOpacity()
+            else:
+                note.hide()
 
