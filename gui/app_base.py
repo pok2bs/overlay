@@ -1,6 +1,7 @@
 import PySide6.QtWidgets
 from import_pyside6 import *
 from gui.custom_button import *
+
 # 출처 https://stackoverflow.com/questions/62807295/how-to-resize-a-window-from-the-edges-after-adding-the-property-qtcore-qt-framel
 class SideGrip(QWidget):
     def __init__(self, parent, edge):
@@ -18,6 +19,7 @@ class SideGrip(QWidget):
             self.setCursor(Qt.SizeVerCursor)
             self.resizeFunc = self.resizeBottom
         self.mousePos = None
+
 
     def resizeLeft(self, delta):
         window = self.window()
@@ -55,16 +57,15 @@ class SideGrip(QWidget):
     def mouseReleaseEvent(self, event):
         self.mousePos = None
 
-
 class OverlayWindow(QMainWindow):
     _gripSize = 6
     def __init__(self):
         super().__init__()
 
+
         self.setAttribute(Qt.WA_TranslucentBackground)
         self.bg = '#000000'
         self.opacity = 0.05
-
 
         self.setWindowFlags(
             Qt.Tool |
@@ -167,6 +168,7 @@ class OverlayWindow(QMainWindow):
         self.main_layout.addWidget(widget)
         self.main_layout.setContentsMargins(0,0,0,0)
         self.past_spacing = self.main_layout.spacing()
+        main_widget.setContentsMargins(0,0,0,0)
 
         main_widget.setLayout(self.main_layout)
         return super().setCentralWidget(main_widget)
@@ -211,7 +213,55 @@ class OverlayWindow(QMainWindow):
             self.title_bar.show()
 
         self.setGripSize(6)
+
+    def set_overlay(self):
+        if self.title_bar.toggle_button.is_active:
+
+            self.setWindowOpacity(1)
+            self.title_bar.show()
+
+            self.raise_()
+        else:
+            self.show()
+        self.set_lock_change()
+
+
+    def set_no_overlay(self):
+        if self.title_bar.toggle_button.is_active:
+            self.title_bar.hide()
+
+            self.setOpacity()
+            #마우스 입력 통과 
+            self.set_lock_change()
+        else:
+            self.hide()
+
+    def is_overlay(self):
+        if self.isHidden() or self.title_bar.isHidden():
+            return False
+        else:
+            return True
         
+    def set_lock_change(self):
+            if self.title_bar.lock_button.is_active:
+                print(self.is_overlay())
+                if self.is_overlay():
+                    self.setWindowFlag(Qt.WindowTransparentForInput, False)
+                    self.show()
+                else:
+                    self.setWindowFlag(Qt.WindowTransparentForInput, True)
+                    self.show()
+        
+    def mousePressEvent(self, event):
+        if event.button() == Qt.LeftButton:
+            # self.clickPos = event.windowPos().toPoint()
+            self.clickPos = event.scenePosition().toPoint()
+
+
+    def mouseMoveEvent(self, event):
+        if self.clickPos is not None:
+            # self.window().move(event.globalPos() - self.clickPos)
+            self.window().move(event.globalPosition().toPoint() - self.clickPos)
 
 class CustomTitleBar(QFrame):
     def __init__(self, parent):
@@ -227,11 +277,15 @@ class CustomTitleBar(QFrame):
         self.toggle_button = ToggleButton("")
         self.toggle_button.setMaximumWidth(20)
         self.toggle_button.clicked.connect(self.toggle_event)
+        self.lock_button = ToggleButton("L")
+        self.lock_button.toggled_style_sheet(color = "00A0A0", hover= "20FFFF", pressed="008080")
+
 
         self.size_button = TitleBarButton("ㅁ")
         self.close_button = TitleBarButton(text = "X", color = "E21A1A", hover= "EC7777", pressed="981B1B")
 
         self.size_button.clicked.connect(self.resize)
+        self.size_button.hide()
         self.close_button.clicked.connect(self.parent.close)
 
         horizen_spacer = QSpacerItem(20, 40, QSizePolicy.Expanding, QSizePolicy.Minimum )
@@ -240,6 +294,7 @@ class CustomTitleBar(QFrame):
         self.main_layout.addWidget(self.title)
 
         self.main_layout.addItem(horizen_spacer)
+        
         self.slider = QSlider(Qt.Horizontal)
         self.slider.setStyleSheet('''
                             QSlider::groove:horizontal{
@@ -264,6 +319,7 @@ class CustomTitleBar(QFrame):
 
         self.main_layout.addWidget(self.slider)
         self.main_layout.addWidget(self.toggle_button)
+        self.main_layout.addWidget(self.lock_button)
         self.main_layout.addWidget(self.size_button)
         self.main_layout.addWidget(self.close_button)
         self.main_layout.setContentsMargins(5,0,3,0)

@@ -1,4 +1,3 @@
-import PySide6.QtGui
 from import_pyside6 import *
 from gui.custom_button import TaskBarButton
 
@@ -23,7 +22,8 @@ class taskBar(QWidget):
         self.note_Button = TaskBarButton("메모장")
         self.browser_Button = TaskBarButton("브라우저")
         self.image_Button = TaskBarButton("이미지")
-        self.music_Button = TaskBarButton("음악")
+        self.widget_Button = TaskBarButton("위젯")
+        self.setting_Button = TaskBarButton("설정")
 
         self.main_frame.setStyleSheet("background-color:#353535; border-radius: 20px")
 
@@ -31,7 +31,8 @@ class taskBar(QWidget):
         self.main_layout.addWidget(self.note_Button)
         self.main_layout.addWidget(self.browser_Button)
         self.main_layout.addWidget(self.image_Button)
-        self.main_layout.addWidget(self.music_Button)
+        self.main_layout.addWidget(self.widget_Button)
+        self.main_layout.addWidget(self.setting_Button)
         self.main_layout.setSpacing(self.main_layout.contentsMargins().left())
 
         self.setMaximumSize(self.main_layout.minimumSize())
@@ -45,7 +46,7 @@ class taskBar(QWidget):
         self.setLayout(layout)
 
     def window_move(self):
-        self.move(self.parent.width()/3 + self.width()/2,self.parent.height() - 100 - self.height())
+        self.move(self.parent.width()/2 - self.width()/2,self.parent.height() - 100 - self.height())
         self.activateWindow()
         self.show()
 

@@ -9,7 +9,7 @@ class MainUi(QWidget):
     hid = Signal()
     def __init__(self):
         super().__init__()
-
+        
         self.clock = Clock(self)
         self.task_bar = taskBar(self)
 
@@ -30,15 +30,14 @@ class MainUi(QWidget):
             Qt.WindowStaysOnTopHint
                         )
         self.setAttribute(Qt.WA_TranslucentBackground, True)
-        self.nomal = False
 
     def paintEvent(self, e):
         
-        qp = QPainter()
-        qp.begin(self)
-        qp.setOpacity(0.5)
-        self.draw_rect(qp)
-        qp.end()
+        painter = QPainter()
+        painter.begin(self)
+        painter.setOpacity(0.5)
+        self.draw_rect(painter)
+        painter.end()
 
     def draw_rect(self, qp):
         qp.setBrush(QColor(0,0,0))

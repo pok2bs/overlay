@@ -5,6 +5,7 @@ import json, sys
 class BrowserManager(QObject):
     def __init__(self, parent):
         super().__init__()
+        self.parent = parent
         self.hover = True
         self.view = list()
         self.profile = QWebEngineProfile()
@@ -18,22 +19,12 @@ class BrowserManager(QObject):
         parent.hid.connect(self.hide)
     def show(self):
         for view in self.view:
-            if view.title_bar.toggle_button.is_active:
-
-                view.setWindowOpacity(1)
-                view.title_bar.show()
-                view.raise_()
-            else:
-                view.show()
+            view.set_overlay()
 
     def hide(self):
         for view in self.view:
-            if view.title_bar.toggle_button.is_active:
-                view.title_bar.hide()
-
-                view.setOpacity()
-            else:
-                view.hide()
+            view.set_no_overlay()
+                
             
     def load(self):
         try:
@@ -79,6 +70,10 @@ class BrowserManager(QObject):
         else:
             view.signal_connect()
         view.ui.view_widget.setUrl(QUrl("https:/www.google.com"))
+        
+        if self.parent.isHidden():
+            view.title_bar.toggle_button.click()
+            view.set_no_overlay()
 
         view.show()
 

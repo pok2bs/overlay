@@ -15,6 +15,7 @@ class NoteWindow(OverlayWindow):
 
         main_frame = QFrame()
         main_frame.setStyleSheet("background-color: #404040; color: white; border-radius: 15px;")
+ 
         main_frame.setLayout(main_layout)
 
         self.setCentralWidget(main_frame)
@@ -87,3 +88,5 @@ class NoteWindow(OverlayWindow):
     def closeEvent(self, event: QCloseEvent) -> None:
         self.parent.note.remove(self)
         return super().closeEvent(event)
+    
+

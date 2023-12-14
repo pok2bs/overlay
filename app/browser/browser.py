@@ -161,15 +161,15 @@ class BrowserWindow (OverlayWindow):
             profile = QWebEngineProfile("storage-{0}".format(self.profile_list[self.select_profile_num]["storagenum"]), self.ui.view_widget)
 
             page = QWebEnginePage(profile, self.ui.view_widget)
-            self.ui.view_widget.page().profile().downloadRequested.connect(self.on_downloadRequested)
 
-            self.signal_connect()
             
             if self.password_widget.is_new_window_show.isChecked():
                 self.new_profile_window.emit(page.profile())
                 return
             else:
                 self.ui.view_widget.setPage(page)
+                self.signal_connect()
+
                 self.profile_num = self.select_profile_num
             self.bookmarks_update()
             self.ui.view_widget.setUrl("https://google.com")
@@ -314,10 +314,15 @@ class BrowserWindow (OverlayWindow):
         else:
             self.ui.view_widget.setUrl(url)
 
-    def move_to_url(self):
-        self.input_url = self.ui.url_edit.text()
-        url_ok = False
+    def move_to_url(self, url = None):
+        print(url)
+        if url == None:
+            self.input_url = self.ui.url_edit.text()
+        else:
+            self.input_url = url
         url = QUrl(self.input_url)
+        print(self.input_url)
+        url_ok = False
 
         try:
             #예) https://exemple.com
@@ -338,6 +343,9 @@ class BrowserWindow (OverlayWindow):
             self.ui.view_widget.setUrl(url)
         else:
             self.ui.view_widget.setUrl(f"https://www.google.com/search?q={self.input_url}")
+            
+    def signal_raley(self):
+        self.parent.parent.view.new_window(True)
         
 
     def fullscreen(self, is_from_browser = False):
@@ -465,8 +473,8 @@ class BrowserWindow (OverlayWindow):
             if self.profile_num is not None : self.profile_list[self.profile_num]["isLastProfile"] = True
             self.save()
             self.parent.appCloseEvent()
+        self.ui.view_widget.deleteLater()
         event.accept()
-        self.activateWindow()
 
 
 

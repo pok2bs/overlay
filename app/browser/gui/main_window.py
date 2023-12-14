@@ -29,7 +29,7 @@ class MainWindow (object):
 
         #웹 표시
         self.stacked_view = QStackedWidget()
-        self.view_widget = customWebView()
+        self.view_widget = customWebView(parent)
         self.view_widget.setAutoFillBackground(False)
 
         url = QUrl("https://WWW.google.com")
